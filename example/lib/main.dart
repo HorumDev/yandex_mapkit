@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
+import 'package:yandex_mapkit_example/examples/pedastrian_page.dart';
 
 import 'package:yandex_mapkit_example/examples/widgets/map_page.dart';
 import 'package:yandex_mapkit_example/examples/circle_page.dart';
@@ -20,6 +21,7 @@ void main() {
 }
 
 const List<MapPage> _allPages = <MapPage>[
+  PedestrianPage(),
   DrivingPage(),
   MapControlsPage(),
   ClusterizedPlacemarkCollectionPage(),

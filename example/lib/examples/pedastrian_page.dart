@@ -154,7 +154,7 @@ class _SessionState extends State<_SessionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Driving ${widget.session.id}')),
+        appBar: AppBar(title: Text('Pedestrian ${widget.session.id}')),
         body: Container(
             padding: const EdgeInsets.all(8),
             child: Column(

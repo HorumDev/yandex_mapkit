@@ -48,7 +48,7 @@ class _ExampleState extends State<_Example> {
   );
   final Placemark endPlacemark = Placemark(
       mapId: MapObjectId('end_placemark'),
-      point: Point(latitude: 48.4814, longitude: 135.0721),
+      point: Point(latitude: 46.4814, longitude: 40.0721),
       icon: PlacemarkIcon.single(
           PlacemarkIconStyle(
               image: BitmapDescriptor.fromAssetImage('lib/assets/route_end.png'),

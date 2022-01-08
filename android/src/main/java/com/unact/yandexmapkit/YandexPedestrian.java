@@ -60,7 +60,8 @@ public class YandexPedestrian implements MethodCallHandler {
 
         Session session = pedestrianRouter.requestRoutes(
                 points,
-                (TimeOptions) params.get("timeOptions"),
+                //(TimeOptions) params.get("timeOptions"),
+                new TimeOptions(),
                 new YandexPedestrianListener(result)
         );
 

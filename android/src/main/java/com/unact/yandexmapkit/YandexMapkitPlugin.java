@@ -19,12 +19,14 @@ public class YandexMapkitPlugin implements FlutterPlugin, ActivityAware {
   private static final String SEARCH_CHANNEL_ID   = "yandex_mapkit/yandex_search";
   private static final String SUGGEST_CHANNEL_ID  = "yandex_mapkit/yandex_suggest";
   private static final String DRIVING_CHANNEL_ID  = "yandex_mapkit/yandex_driving";
+  private static final String PEDESTRIAN_CHANNEL_ID  = "yandex_mapkit/yandex_pedestrian";
 
   @Nullable private Lifecycle lifecycle;
 
   @Nullable private MethodChannel searchMethodChannel;
   @Nullable private MethodChannel suggestMethodChannel;
   @Nullable private MethodChannel drivingRouterMethodChannel;
+  @Nullable private MethodChannel pedestrianRouterMethodChannel;
 
   @Override
   public void onAttachedToEngine(FlutterPluginBinding binding) {
@@ -53,6 +55,10 @@ public class YandexMapkitPlugin implements FlutterPlugin, ActivityAware {
     drivingRouterMethodChannel = new MethodChannel(messenger, DRIVING_CHANNEL_ID);
     YandexDriving yandexDriving = new YandexDriving(context, messenger);
     drivingRouterMethodChannel.setMethodCallHandler(yandexDriving);
+
+    pedestrianRouterMethodChannel = new MethodChannel(messenger, PEDESTRIAN_CHANNEL_ID);
+    YandexPedestrian yandexPedestrian = new YandexPedestrian(context, messenger);
+    pedestrianRouterMethodChannel.setMethodCallHandler(yandexPedestrian);
   }
 
   @SuppressWarnings({"ConstantConditions"})

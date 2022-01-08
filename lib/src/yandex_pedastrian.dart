@@ -1,6 +1,6 @@
 part of yandex_mapkit;
 
-/// Interface for the driving router.
+/// Interface for the pedestrian router.
 class YandexPedestrian {
   static const String _channelName = 'yandex_mapkit/yandex_pedestrian';
   static const MethodChannel _channel = MethodChannel(_channelName);

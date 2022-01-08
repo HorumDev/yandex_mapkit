@@ -1,6 +1,6 @@
 part of yandex_mapkit;
 
-/// Driving route.
+/// pedestrian route.
 /// A route consists of multiple sections
 /// Each section has a corresponding annotation that describes the action at the beginning of the section.
 class PedestrianRoute extends Equatable {

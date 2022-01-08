@@ -16,7 +16,7 @@ class PedestrianSession {
 
   /// Retries current session
   ///
-  /// After [DrivingSession.close] has been called, all subsequent calls will return a [DrivingSessionException]
+  /// After [PedestrianSession.close] has been called, all subsequent calls will return a [PedestrianSessionException]
   Future<void> retry() async {
     if (_isClosed) {
       throw PedestrianSessionException._('Session is closed');
@@ -27,7 +27,7 @@ class PedestrianSession {
 
   /// Cancels current session
   ///
-  /// After [DrivingSession.close] has been called, all subsequent calls will return a [DrivingSessionException]
+  /// After [PedestrianSession.close] has been called, all subsequent calls will return a [PedestrianSessionException]
   Future<void> cancel() async {
     if (_isClosed) {
       throw PedestrianSessionException._('Session is closed');
@@ -38,7 +38,7 @@ class PedestrianSession {
 
   /// Closes current session
   ///
-  /// After first call, all subsequent calls will return a [DrivingSessionException]
+  /// After first call, all subsequent calls will return a [PedestrianSessionException]
   Future<void> close() async {
     if (_isClosed) {
       throw PedestrianSessionException._('Session is closed');

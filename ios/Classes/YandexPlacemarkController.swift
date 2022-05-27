@@ -64,9 +64,12 @@ class YandexPlacemarkController:
   }
 
   public func update(_ params: [String: Any]) {
-    placemark.geometry = Utils.pointFromJson(params["point"] as! [String: NSNumber])
+    if (!internallyControlled) {
+      placemark.geometry = Utils.pointFromJson(params["point"] as! [String: NSNumber])
+      placemark.isVisible = (params["isVisible"] as! NSNumber).boolValue
+    }
+
     placemark.zIndex = (params["zIndex"] as! NSNumber).floatValue
-    placemark.isVisible = (params["isVisible"] as! NSNumber).boolValue
     placemark.isDraggable = (params["isDraggable"] as! NSNumber).boolValue
     placemark.opacity = (params["opacity"] as! NSNumber).floatValue
     placemark.direction = (params["direction"] as! NSNumber).floatValue
@@ -138,16 +141,21 @@ class YandexPlacemarkController:
 
   private func getIconImage(_ image: [String: Any]) -> UIImage {
     let type = image["type"] as! String
+    let defaultImage = UIImage()
 
     if (type == "fromAssetImage") {
-      return UIImage(named: controller.pluginRegistrar.lookupKey(forAsset: image["assetName"] as! String))!
+      let assetName = controller.pluginRegistrar.lookupKey(forAsset: image["assetName"] as! String)
+
+      return UIImage(named: assetName) ?? defaultImage
     }
 
     if (type == "fromBytes") {
-      return UIImage(data: (image["rawImageData"] as! FlutterStandardTypedData).data)!
+      let imageData = (image["rawImageData"] as! FlutterStandardTypedData).data
+
+      return UIImage(data: imageData) ?? defaultImage
     }
 
-    return UIImage()
+    return defaultImage
   }
 
   private func getIconStyle(_ style: [String: Any]) -> YMKIconStyle {

@@ -77,7 +77,7 @@ class Utils {
   }
 
   static func suggestOptionsFromJson(_ json: [String: Any]) -> YMKSuggestOptions {
-    let userPosition = json["userPosition"] != nil ?
+    let userPosition = json["userPosition"] as? [String: Any] != nil ?
       pointFromJson(json["userPosition"] as! [String: NSNumber]) :
       nil
 
@@ -190,7 +190,7 @@ class Utils {
       "bottomLeft": pointToJson(region.bottomLeft),
       "bottomRight": pointToJson(region.bottomRight),
       "topLeft": pointToJson(region.topLeft),
-      "topRight": pointToJson(region.bottomLeft)
+      "topRight": pointToJson(region.topRight)
     ]
   }
 }

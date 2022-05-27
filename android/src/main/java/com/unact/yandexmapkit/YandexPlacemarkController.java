@@ -1,5 +1,6 @@
 package com.unact.yandexmapkit;
 
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.yandex.mapkit.map.PlacemarkMapObject;
 import com.yandex.mapkit.map.RotationType;
 import com.yandex.runtime.image.ImageProvider;
 
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
@@ -81,9 +83,12 @@ public class YandexPlacemarkController
   }
   @SuppressWarnings({"unchecked", "ConstantConditions"})
   public void update(Map<String, Object> params) {
-    placemark.setGeometry(Utils.pointFromJson((Map<String, Object>) params.get("point")));
+    if (!internallyControlled) {
+      placemark.setGeometry(Utils.pointFromJson((Map<String, Object>) params.get("point")));
+      placemark.setVisible((Boolean) params.get("isVisible"));
+    }
+
     placemark.setZIndex(((Double) params.get("zIndex")).floatValue());
-    placemark.setVisible((Boolean) params.get("isVisible"));
     placemark.setDraggable((Boolean) params.get("isDraggable"));
     placemark.setOpacity(((Double) params.get("opacity")).floatValue());
     placemark.setDirection(((Double) params.get("direction")).floatValue());
@@ -139,21 +144,32 @@ public class YandexPlacemarkController
   @SuppressWarnings({"ConstantConditions"})
   private ImageProvider getIconImage(Map<String, Object> image) {
     String type = (String) image.get("type");
+    ImageProvider defaultImage = ImageProvider.fromBitmap(Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888));
 
     if (type.equals("fromAssetImage")) {
-      return ImageProvider.fromAsset(
-        controller.get().context,
-        FlutterInjector.instance().flutterLoader().getLookupKeyForAsset((String) image.get("assetName"))
-      );
+      String assetName = FlutterInjector.instance().flutterLoader().getLookupKeyForAsset((String) image.get("assetName"));
+
+      try (InputStream i = controller.get().context.getAssets().open(assetName)) {
+        Bitmap result = BitmapFactory.decodeStream(i);
+
+        return ImageProvider.fromBitmap(result);
+      } catch (java.io.IOException e) {
+        return defaultImage;
+      }
     }
-    
+
     if (type.equals("fromBytes")) {
       byte[] rawImageData = (byte[]) image.get("rawImageData");
+      Bitmap bitmap = BitmapFactory.decodeByteArray(rawImageData, 0, rawImageData.length);
 
-      return ImageProvider.fromBitmap(BitmapFactory.decodeByteArray(rawImageData, 0, rawImageData.length));
+      if (bitmap != null) {
+        return ImageProvider.fromBitmap(bitmap);
+      }
+
+      return defaultImage;
     }
 
-    return null;
+    return defaultImage;
   }
 
   @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -170,7 +186,7 @@ public class YandexPlacemarkController
     iconStyle.setVisible((Boolean) style.get("isVisible"));
     iconStyle.setFlat((Boolean) style.get("isFlat"));
     iconStyle.setRotationType(RotationType.values()[(Integer) style.get("rotationType")]);
-    
+
     return iconStyle;
   }
 

@@ -52,7 +52,6 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
       }
     ]
   ''';
-  double _height = 0;
 
   String _enabledText(bool enabled) {
     return enabled ? 'on' : 'off';
@@ -60,7 +59,6 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
 
   @override
   Widget build(BuildContext context) {
-    AndroidYandexMap.useAndroidViewSurface = true;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -101,7 +99,6 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
             },
           )
         ),
-        SizedBox(height: _height),
         const SizedBox(height: 20),
         Expanded(
           child: SingleChildScrollView(
@@ -218,10 +215,13 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
                   children: <Widget>[
                     ControlButton(
                       onPressed: () async {
+                        final cameraPosition = await controller.getCameraPosition();
+                        final screenPoint = await controller.getScreenPoint(cameraPosition.target);
+
                         setState(() {
-                          screenRect = const ScreenRect(
-                            bottomRight: ScreenPoint(x: 600, y: 600),
-                            topLeft: ScreenPoint(x: 200, y: 200)
+                          screenRect = ScreenRect(
+                            topLeft: ScreenPoint(x: 0, y: 0),
+                            bottomRight: screenPoint!
                           );
                         });
                       },
@@ -242,14 +242,14 @@ class _MapControlsExampleState extends State<_MapControlsExample> {
                     ControlButton(
                       onPressed: () async {
                         final region = await controller.getFocusRegion();
-                        print('TopLeft: ${region.topLeft}, BottomRight: ${region.bottomRight}');
+                        print(region);
                       },
                       title: 'Focus region'
                     ),
                     ControlButton(
                       onPressed: () async {
                         final region = await controller.getVisibleRegion();
-                        print('TopLeft: ${region.topLeft}, BottomRight: ${region.bottomRight}');
+                        print(region);
                       },
                       title: 'Visible region'
                     )

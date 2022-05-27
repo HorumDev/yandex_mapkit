@@ -59,10 +59,13 @@ public class YandexCircleController extends YandexMapObjectController implements
 
   @SuppressWarnings({"ConstantConditions"})
   public void update(Map<String, Object> params) {
-    circle.setGeometry(Utils.circleFromJson(params));
+    if (!internallyControlled) {
+      circle.setGeometry(Utils.circleFromJson(params));
+      circle.setVisible((Boolean) params.get("isVisible"));
+    }
+
     circle.setGeodesic((Boolean) params.get("isGeodesic"));
     circle.setZIndex(((Double) params.get("zIndex")).floatValue());
-    circle.setVisible((Boolean) params.get("isVisible"));
     circle.setStrokeColor(((Number) params.get("strokeColor")).intValue());
     circle.setStrokeWidth(((Double) params.get("strokeWidth")).floatValue());
     circle.setFillColor(((Number) params.get("fillColor")).intValue());

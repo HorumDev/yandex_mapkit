@@ -1,3 +1,35 @@
+## 2.0.6
+
+* Fix iOS crash for `YandexMapController.moveCamera`
+* Add the ability to follow user
+* Fixed mutable lists in `Polygon`, `Polyline`
+* **Breaking change**. Removed const definition from `Polygon`, `Polyline`, `Circle`, `Placemark`
+
+## 2.0.5
+
+* Fix several crashes for iOS and Android
+
+## 2.0.4
+
+* Minor optimizations
+* Fix incorrect displaying of clusters for slow devices
+* Fix Android init on Activity restart in example app
+* Fix incorrect rendering of UserLocationView MapObjects
+
+## 2.0.3
+
+* Fix iOS crash for `YandexSuggest.getSuggestions`
+* Fix incorrect PlacemarkIconStyle constructor signature
+
+## 2.0.2
+
+* Fix Android view showing when `AndroidYandexMap.useAndroidViewSurface = true` and MainActivity is FlutterFragmentActivity
+
+## 2.0.1
+
+* Fix Android view showing when `AndroidYandexMap.useAndroidViewSurface = true` [#180, just-kip]
+* Fix incorrect results for `YandexMapController.getVisibleRegion` and `YandexMapController.getFocusRegion`
+
 ## 2.0.0
 
 * Add Hybrid composition for Android

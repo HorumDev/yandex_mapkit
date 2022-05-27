@@ -55,11 +55,7 @@ public class YandexMapController:
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "waitForInit":
-      if (mapView.frame.isEmpty) {
-        mapView.initResult = result
-      } else {
-        result(nil)
-      }
+      result(nil)
     case "toggleUserLayer":
       toggleUserLayer(call)
       result(nil)
@@ -116,6 +112,14 @@ public class YandexMapController:
     userLocationLayer.setVisibleWithOn(params["visible"] as! Bool)
     userLocationLayer.isHeadingEnabled = params["headingEnabled"] as! Bool
     userLocationLayer.isAutoZoomEnabled = params["autoZoomEnabled"] as! Bool
+    userLocationLayer.resetAnchor()
+
+    if let anchor = params["anchor"] as? [String: Any] {
+      userLocationLayer.setAnchorWithAnchorNormal(
+        Utils.rectPointFromJson(anchor["normal"] as! [String: NSNumber]),
+        anchorCourse: Utils.rectPointFromJson(anchor["course"] as! [String: NSNumber])
+      )
+    }
   }
 
   public func setMapStyle(_ call: FlutterMethodCall) -> Bool {
@@ -320,11 +324,25 @@ public class YandexMapController:
     )
   }
 
+  private func validCameraPosition(_ cameraPosition: YMKCameraPosition) -> Bool {
+    return !cameraPosition.zoom.isNaN &&
+      !cameraPosition.tilt.isNaN &&
+      !cameraPosition.azimuth.isNaN &&
+      !cameraPosition.target.latitude.isNaN &&
+      !cameraPosition.target.longitude.isNaN
+  }
+
   private func move(
     cameraPosition: YMKCameraPosition,
     animationParams: [String: Any]?,
     result: @escaping FlutterResult
   ) {
+    if !validCameraPosition(cameraPosition) {
+      result(false)
+
+      return
+    }
+
     if animationParams == nil {
       mapView.mapWindow.map.move(with: cameraPosition)
       result(true)
@@ -425,6 +443,15 @@ public class YandexMapController:
       bottomRight: Utils.screenPointFromJson(params!["bottomRight"] as! [String: NSNumber])
     )
 
+    if (
+      screenRect.topLeft.y < 0 ||
+      screenRect.topLeft.x < 0 ||
+      screenRect.bottomRight.y > Float(mapView.mapWindow.height()) ||
+      screenRect.bottomRight.x > Float(mapView.mapWindow.width())
+    ) {
+      return
+    }
+
     mapView.mapWindow.focusRect = screenRect
     mapView.mapWindow.pointOfView = YMKPointOfView.adaptToFocusRectHorizontally
   }
@@ -437,11 +464,11 @@ public class YandexMapController:
     ]
 
     methodChannel.invokeMethod("onUserLocationAdded", arguments: arguments) { result in
-      let params = result as! [String: Any]
-
-      if (!view.isValid) {
+      if (result is FlutterError || !view.isValid) {
         return
       }
+
+      let params = result as! [String: Any]
 
       self.userPinController = YandexPlacemarkController(
         parent: view.pin.parent,

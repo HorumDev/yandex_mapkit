@@ -36,7 +36,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.android.FlutterFragmentActivity;
 import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.FlutterException;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.platform.PlatformView;
@@ -63,7 +66,7 @@ public class YandexMapController implements
   private final YandexMapObjectCollectionController rootController;
   private boolean disposed = false;
 
-  @SuppressWarnings({"unchecked", "ConstantConditions"})
+  @SuppressWarnings({"unchecked", "ConstantConditions", "InflateParams"})
   public YandexMapController(
     int id,
     Context context,
@@ -73,7 +76,15 @@ public class YandexMapController implements
   ) {
     this.lifecycleProvider = lifecycleProvider;
     this.context = context;
-    mapView = new MapView(context);
+
+    if (context instanceof FlutterActivity) {
+      mapView = (MapView) ((FlutterActivity) context).getLayoutInflater().inflate(R.layout.map_view, null);
+    } else if (context instanceof FlutterFragmentActivity) {
+      mapView = (MapView) ((FlutterFragmentActivity) context).getLayoutInflater().inflate(R.layout.map_view, null);
+    } else {
+      mapView = new MapView(context);
+    }
+
     mapView.onStart();
 
     userLocationLayer = MapKitFactory.getInstance().createUserLocationLayer(mapView.getMapWindow());
@@ -177,9 +188,19 @@ public class YandexMapController implements
     if (!hasLocationPermission()) return;
 
     Map<String, Object> params = ((Map<String, Object>) call.arguments);
+    Map<String, Object> anchor = (Map<String, Object>) params.get("anchor");
+
     userLocationLayer.setVisible((Boolean) params.get("visible"));
     userLocationLayer.setHeadingEnabled((Boolean) params.get("headingEnabled"));
     userLocationLayer.setAutoZoomEnabled((Boolean) params.get("autoZoomEnabled"));
+    userLocationLayer.resetAnchor();
+
+    if (anchor != null) {
+      userLocationLayer.setAnchor(
+        Utils.rectPointFromJson((Map<String, Double>) anchor.get("normal")),
+        Utils.rectPointFromJson((Map<String, Double>) anchor.get("course"))
+      );
+    }
   }
 
   @SuppressWarnings({"unchecked", "ConstantConditions"})
@@ -392,15 +413,30 @@ public class YandexMapController implements
     );
   }
 
+  private boolean validCameraPosition(CameraPosition cameraPosition) {
+    return !((Float) cameraPosition.getZoom()).isNaN() &&
+      !((Float) cameraPosition.getZoom()).isNaN() &&
+      !((Float) cameraPosition.getAzimuth()).isNaN() &&
+      !((Double) cameraPosition.getTarget().getLatitude()).isNaN() &&
+      !((Double) cameraPosition.getTarget().getLongitude()).isNaN();
+  }
+
   @SuppressWarnings({"ConstantConditions"})
   private void move(
     CameraPosition cameraPosition,
     Map<String, Object> paramsAnimation,
     final MethodChannel.Result result
   ) {
+    if (!validCameraPosition(cameraPosition)) {
+      result.success(false);
+
+      return;
+    }
+
     if (paramsAnimation == null) {
       mapView.getMap().move(cameraPosition);
       result.success(true);
+
       return;
     }
 
@@ -521,11 +557,11 @@ public class YandexMapController implements
     methodChannel.invokeMethod("onUserLocationAdded", arguments, new MethodChannel.Result() {
       @Override
       public void success(@Nullable Object result) {
-        Map<String, Object> params = ((Map<String, Object>) result);
-
-        if (!view.isValid()) {
+        if (result instanceof FlutterException || !view.isValid()) {
           return;
         }
+
+        Map<String, Object> params = ((Map<String, Object>) result);
 
         userPinController = new YandexPlacemarkController(
           view.getPin().getParent(),
